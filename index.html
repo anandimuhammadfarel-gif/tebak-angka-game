@@ -1,137 +1,123 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1e1e2e">
-<title>Tebak Angka</title>
-<link rel="manifest" href="manifest.json">
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tebak Angka</title>
+  
+  <!-- PWA Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e1e2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
     body {
-        font-family: Arial, sans-serif;
-        background: #1e1e2e;
-        color: white;
-        text-align: center;
-        padding: 20px;
-        margin: 0;
+      background: #1e1e2e;
+      color: #fff;
     }
+
     .container {
-        max-width: 400px;
-        margin: auto;
-        background: #313244;
-        padding: 20px;
-        border-radius: 15px;
-        margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
     }
-    h1 { color: #89b4fa; }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 28px;
+    }
+
+    .game {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+    }
+
     input {
-        font-size: 24px;
-        width: 80px;
-        text-align: center;
-        padding: 10px;
-        border-radius: 10px;
-        border: none;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      text-align: center;
+      width: 200px;
+      margin: 0 auto;
     }
+
     button {
-        font-size: 18px;
-        padding: 12px 24px;
-        margin: 10px;
-        border: none;
-        border-radius: 10px;
-        background: #89b4fa;
-        color: #1e1e2e;
-        font-weight: bold;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #7c3aed;
+      color: white;
+      cursor: pointer;
+      width: 200px;
+      margin: 0 auto;
     }
-    button:active { background: #74c7ec; }
-    #pesan { font-size: 20px; margin: 15px 0; min-height: 30px; }
-    #btnInstall {
-        background: #a6e3a1;
-        display: none;
+
+    button:hover {
+      background: #6d28d9;
     }
-</style>
+
+    #result {
+      font-size: 20px;
+      min-height: 30px;
+    }
+
+    .credit {
+      font-size: 14px;
+      color: #a0a0b0;
+      text-align: center;
+      margin-top: 30px;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>TEBAK ANGKA 1-10</h1>
-    <p id="info">Kamu punya 5 nyawa!</p>
-    <input type="number" id="tebakan" min="1" max="10">
-    <br>
-    <button onclick="tebak()">TEBAK</button>
-    <button id="btnInstall" onclick="installApp()">INSTALL APP</button>
-    <div id="pesan"></div>
-    <button onclick="resetGame()" style="display:none" id="btnReset">MAIN LAGI</button>
-</div>
-
-<script>
-let deferredPrompt;
-let angkaRahasia = Math.floor(Math.random() * 10) + 1;
-let nyawa = 5;
-let percobaan = 0;
-
-// Deteksi kalau bisa diinstall
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('btnInstall').style.display = 'inline-block';
-});
-
-function installApp() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-            deferredPrompt = null;
-            document.getElementById('btnInstall').style.display = 'none';
-        });
-    }
-}
-
-function tebak() {
-    let tebakan = parseInt(document.getElementById('tebakan').value);
-    if (!tebakan || tebakan < 1 || tebakan > 10) {
-        document.getElementById('pesan').innerText = "Masukin angka 1-10 dong!";
-        return;
-    }
+  <div class="container">
+    <h1>Tebak Angka</h1>
     
-    percobaan++;
-    if (tebakan === angkaRahasia) {
-        document.getElementById('pesan').innerText = `YESS bener! Menang dalam ${percobaan} kali 🔥`;
-        endGame();
-    } else if (tebakan < angkaRahasia) {
-        document.getElementById('pesan').innerText = "Kekecilan bro";
-    } else {
-        document.getElementById('pesan').innerText = "Kebesaran bro";
-    }
+    <div class="game">
+      <p>Guessing game 1-100</p>
+      <input type="number" id="guess" placeholder="Masukkan angka">
+      <button onclick="checkGuess()">Tebak</button>
+      <p id="result"></p>
+    </div>
+
+    <p class="credit">by farel</p>
+  </div>
+
+  <script>
+    let target = Math.floor(Math.random() * 100) + 1;
     
-    nyawa--;
-    document.getElementById('info').innerText = `Sisa nyawa: ${nyawa}`;
-    if (nyawa === 0) {
-        document.getElementById('pesan').innerText = `Kalah! Angkanya ${angkaRahasia}`;
-        endGame();
+    function checkGuess() {
+      let guess = document.getElementById('guess').value;
+      let result = document.getElementById('result');
+      
+      if (guess == target) {
+        result.textContent = "Benar! 🎉";
+      } else if (guess < target) {
+        result.textContent = "Terlalu kecil!";
+      } else {
+        result.textContent = "Terlalu besar!";
+      }
     }
-    document.getElementById('tebakan').value = "";
-}
 
-function endGame() {
-    document.getElementById('tebakan').disabled = true;
-    document.querySelector('button[onclick="tebak()"]').disabled = true;
-    document.getElementById('btnReset').style.display = 'inline-block';
-}
-
-function resetGame() {
-    angkaRahasia = Math.floor(Math.random() * 10) + 1;
-    nyawa = 5;
-    percobaan = 0;
-    document.getElementById('info').innerText = "Kamu punya 5 nyawa!";
-    document.getElementById('pesan').innerText = "";
-    document.getElementById('tebakan').disabled = false;
-    document.querySelector('button[onclick="tebak()"]').disabled = false;
-    document.getElementById('btnReset').style.display = 'none';
-}
-
-// Daftar service worker biar bisa offline
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-}
-</script>
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
